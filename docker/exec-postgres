@@ -1,0 +1,15 @@
+#!/bin/bash -eu
+set -o pipefail
+
+cmd=${1:-}
+shift 1 || true
+opts=("$@")
+
+if [ -z "$cmd" ]; then
+    cmd=psql
+fi
+#-------------------------------------------------------------------------------
+docker compose exec \
+    -u postgres \
+    -w /var/lib/postgresql \
+    postgres "$cmd" "${opts[@]}"

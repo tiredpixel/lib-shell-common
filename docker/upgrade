@@ -1,0 +1,16 @@
+#!/bin/bash -eu
+set -o pipefail
+
+dockerfile=${1:-Dockerfile}
+#-------------------------------------------------------------------------------
+grep -E '^# FROMFREEZE (.*)$' "$dockerfile" | while read -r line; do
+    data=${line#"# FROMFREEZE "}
+    repo=${data%:*}
+    tag=${data#*:}
+    
+    echo "Digesting $repo:$tag"
+    digest=$(docker pull "$repo:$tag" | grep '^Digest: ' | cut -d' ' -f2)
+    echo "  => $digest"
+    
+    sed -i -E "s|^FROM ${repo}[:@]\S+(.*)$|FROM $repo@$digest\1|g" "$dockerfile"
+done

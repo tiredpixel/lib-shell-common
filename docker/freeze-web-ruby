@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+set -o pipefail
+#-------------------------------------------------------------------------------
+docker compose exec -T web /usr/local/bin/bundle lock

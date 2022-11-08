@@ -1,0 +1,13 @@
+#!/bin/bash -eu
+set -o pipefail
+
+cmd=${1:-}
+shift 1 || true
+opts=("$@")
+
+if [ -z "$cmd" ]; then
+    cmd=rails
+    opts=(console)
+fi
+#-------------------------------------------------------------------------------
+docker compose exec web "$cmd" "${opts[@]}"
