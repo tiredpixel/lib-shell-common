@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+repo=$(<.dockerrepo)
+#-------------------------------------------------------------------------------
+version=$(git describe)
+release=$(git describe --abbrev=0)
+tags=()
+
+if [ "$version" == "$release" ]; then
+    r=$release
+    r_=""
+    
+    while true; do
+        tags+=("$r")
+        
+        r=${r%.*}
+        
+        if [ "$r" == "$r_" ]; then
+            break
+        else
+            r_=$r
+        fi
+    done
+fi
+
+commit_latest=$(git for-each-ref \
+    --sort=-committerdate --format="%(objectname)" refs/remotes/ | head -n1)
+commit_head=$(git rev-parse HEAD)
+
+if [ "$commit_head" == "$commit_latest" ]; then
+    tags+=(latest)
+fi
+#-------------------------------------------------------------------------------
+echo "latest:  $commit_latest"
+echo "head:    $commit_head"
+echo "version: $version"
+echo "tags:    ${tags[*]}"
+#-------------------------------------------------------------------------------
+# use BuildKit, sharing layers between `docker compose build` and `docker build`
+export DOCKER_BUILDKIT=1
+
+args=()
+for tag in "${tags[@]}"; do
+    args+=("-t")
+    args+=("$repo:$tag")
+done
+
+docker build \
+    --build-arg GIT_DESCRIBE="$(git describe)" \
+    "${args[@]}" \
+    .
+
+for tag in "${tags[@]}"; do
+    docker push "$repo:$tag"
+done
+#-------------------------------------------------------------------------------
+echo "version: $version"
+echo "tags:    ${tags[*]}"
