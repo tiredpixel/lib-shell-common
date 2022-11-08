@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+tag=${1}
+dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+#-------------------------------------------------------------------------------
+"$dir/project" git tag -l 2>/dev/null | sort -Vu | grep "$tag" && exit 1
+
+"$dir/project" git tag -s "$tag" -m "$tag"
+"$dir/project" git push origin "$tag"
