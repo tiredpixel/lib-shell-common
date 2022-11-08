@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+f_modules=.gitprojectmodules
+#-------------------------------------------------------------------------------
+if [ -f "$f_modules" ] ; then
+    while read -r module ; do
+        pushd "$module" >/dev/null
+        
+        echo "*** $module" >&2
+        "$@"
+        
+        popd >/dev/null
+    done < "$f_modules"
+fi
+
+echo "*** $(basename "$PWD")" >&2
+"$@"
