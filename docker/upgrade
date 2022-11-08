@@ -1,5 +1,5 @@
-#!/bin/bash -eu
-set -o pipefail
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
 dockerfile=${1:-Dockerfile}
 #-------------------------------------------------------------------------------

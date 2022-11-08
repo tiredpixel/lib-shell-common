@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 #-------------------------------------------------------------------------------
-docker compose exec -T web /usr/local/bin/bundle lock
+docker compose build \
+    --build-arg GIT_DESCRIBE="$(git describe)"
