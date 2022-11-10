@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+#-------------------------------------------------------------------------------
+docker compose exec -T web bash <<EOF
+mapfile -t controllers < <(rails routes -E |
+    grep 'Controller#Action' | cut -c21- | cut -d'#' -f1 | grep -vE '[(:]' |
+    grep -Ev '^(action_mailbox|active_storage|rails|turbo|redirect)/' |
+    sort -u)
+
+_c=\$(printf "%s|" "\${controllers[@]}")
+
+rails routes -c "\${_c%|}"
+EOF
