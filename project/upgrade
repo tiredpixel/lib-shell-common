@@ -1,31 +1,31 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+dir=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 #-------------------------------------------------------------------------------
 function upgrade() {
-    "$dir/recursive" pull
+    "$dir/../git/recursive" pull
     
-    "$dir/project" truncate -c -s0 \
+    "$dir/each" truncate -c -s0 \
         Gemfile.lock \
         cabal.config \
         cabal.project.freeze \
         yarn.lock
     
-    "$dir/project" sh -c 'test ! -f upgrade || ./upgrade'
+    "$dir/each" sh -c 'test ! -f upgrade || ./upgrade'
 }
 
 function freeze() {
-    "$dir/project" sh -c 'test ! -f freeze || ./freeze'
+    "$dir/each" sh -c 'test ! -f freeze || ./freeze'
 }
 
 function stop() {
-    "$dir/project" sh -c 'test ! -f docker-compose.yml || docker compose stop'
+    "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
 }
 #-------------------------------------------------------------------------------
 upgrade
-"$dir/project-build"
+"$dir/build"
 freeze
 stop
-"$dir/project-build"
+"$dir/build"
 stop

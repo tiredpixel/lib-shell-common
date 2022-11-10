@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-f_modules=.gitprojectmodules
+f_projects=.projects
 #-------------------------------------------------------------------------------
-if [ -f "$f_modules" ] ; then
+if [ -f "$f_projects" ] ; then
     while read -r module ; do
         pushd "$module" >/dev/null
         
-        echo "*** $module" >&2
+        echo -e "\n=== $module" >&2
         "$@"
         
         popd >/dev/null
-    done < "$f_modules"
+    done < "$f_projects"
 fi
 
-echo "*** $(basename "$PWD")" >&2
+echo -e "\n=== $(basename "$PWD")" >&2
 "$@"
+
+echo

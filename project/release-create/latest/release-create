@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+tag=${1}
+dir=$(realpath "$(dirname "${BASH_SOURCE[0]}")/../..")
+#-------------------------------------------------------------------------------
+"$dir/each" git checkout latest
+"$dir/each" git pull
+
+if ! git diff --quiet ; then
+    git add -A
+    git commit -m "update"
+fi
+
+"$dir/tag-create" "$tag"
+"$dir/each" git push
+
+"$dir/each" sh -c 'test ! -f deploy || ./deploy'
