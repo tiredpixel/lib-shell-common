@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 tag=${1}
-dir=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 #-------------------------------------------------------------------------------
 "$dir/each" git tag -l 2>/dev/null | sort -Vu | grep "$tag" && exit 1
 
