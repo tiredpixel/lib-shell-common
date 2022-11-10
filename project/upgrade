@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+self=$(realpath "${BASH_SOURCE[0]}")
+dir=$(dirname "$self")
 #-------------------------------------------------------------------------------
 function upgrade() {
     "$dir/../git/recursive" pull
@@ -12,7 +13,11 @@ function upgrade() {
         cabal.project.freeze \
         yarn.lock
     
-    "$dir/each" sh -c 'test ! -f upgrade || ./upgrade'
+    "$dir/each" sh -c "
+        test ! -f upgrade ||
+        test \"$(realpath upgrade)\" = \"$self\" ||
+        ./upgrade
+    "
 }
 
 function freeze() {
