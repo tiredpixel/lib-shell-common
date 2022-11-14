@@ -3,4 +3,6 @@ set -Eeuo pipefail
 #-------------------------------------------------------------------------------
 terraform fmt -recursive
 
+terraform init
+
 terraform apply
