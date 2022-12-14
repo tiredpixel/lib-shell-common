@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+#-------------------------------------------------------------------------------
+docker compose exec -T \
+    -u postgres \
+    -w /var/lib/postgresql \
+    postgres psql <<EOF
+ALTER SYSTEM SET session_preload_libraries = 'auto_explain';
+LOAD 'auto_explain';
+SELECT pg_reload_conf();
+
+ALTER SYSTEM SET auto_explain.log_min_duration = '1';
+ALTER SYSTEM SET log_min_duration_statement    = '-1';
+SELECT pg_reload_conf();
+
+SHOW auto_explain.log_min_duration;
+SHOW log_min_duration_statement;
+SHOW session_preload_libraries;
+EOF
