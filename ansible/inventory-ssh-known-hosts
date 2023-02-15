@@ -1,0 +1,38 @@
+#!/bin/bash -eu
+
+f=$1
+domain=$2
+shift 2
+#-------------------------------------------------------------------------------
+function cmd_host() {
+    #local host=$1
+    
+    jq '.' <<- EOF
+		{}
+	EOF
+}
+
+function cmd_list() {
+    hosts=$(cut -d' ' -f1 "$f" |
+        cut -d',' -f1 |
+        grep -E "\.$domain$" |
+        xargs -I '{}' echo '"{}"' |
+        jq -nr '"[", try (input|tojson, repeat(",\(input|tojson)")), "]"')
+    
+    jq '.' <<- EOF
+		{
+		    "ungrouped": {
+		        "hosts": $hosts
+		    }
+		}
+	EOF
+}
+#-------------------------------------------------------------------------------
+case "$1" in
+    --host)
+        cmd_host "$2"
+        ;;
+    --list)
+        cmd_list
+        ;;
+esac
