@@ -3,4 +3,8 @@ set -Eeuo pipefail
 
 f_plan=.terraform.plan
 #-------------------------------------------------------------------------------
-terraform apply $f_plan
+terraform fmt -recursive
+
+terraform init
+
+terraform plan -out $f_plan
