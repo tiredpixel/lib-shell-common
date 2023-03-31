@@ -9,4 +9,6 @@ dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 "$dir/../docker/ps-await-healthy"
 
+echo
+
 docker ps
