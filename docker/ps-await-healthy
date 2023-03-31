@@ -5,7 +5,9 @@ while test ! -z "$(docker ps -f health=starting -f health=unhealthy -q)"; do
     mapfile -t cNames < <(docker ps \
         -f health=starting -f health=unhealthy --format '{{.Names}}')
     
-    echo "Awaiting ${cNames[*]}"
+    echo -ne "\r\e[2KAwaiting ${cNames[*]}"
     
     sleep 1
 done
+
+echo
