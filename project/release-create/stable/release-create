@@ -5,7 +5,7 @@ tag=${1}
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..
 #-------------------------------------------------------------------------------
 "$dir/each" git checkout testing
-"$dir/each" git pull
+"$dir/each" git pull --no-recurse-submodules
 
 if ! git diff --quiet ; then
     git add -A
