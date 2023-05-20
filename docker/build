@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+
+opts=("$@")
 #-------------------------------------------------------------------------------
-docker compose build \
+docker compose "${opts[@]}" build \
     --build-arg GIT_DESCRIBE="$(git describe)"
