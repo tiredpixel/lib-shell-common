@@ -16,7 +16,7 @@ fi
 "$dir/each" git push
 
 "$dir/each" git checkout stable
-"$dir/each" git pull
+"$dir/each" git pull --no-recurse-submodules
 "$dir/each" git merge "$tag"
 "$dir/each" git push
 
