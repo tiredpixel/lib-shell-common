@@ -5,7 +5,7 @@ self=$(realpath "${BASH_SOURCE[0]}")
 dir=$(dirname "$self")
 #-------------------------------------------------------------------------------
 function upgrade() {
-    "$dir/../git/recursive" pull
+    "$dir/../git/recursive" pull --no-recurse-submodules
     
     "$dir/each" truncate -c -s0 \
         Gemfile.lock \
