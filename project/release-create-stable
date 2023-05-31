@@ -3,8 +3,9 @@ set -Eeuo pipefail
 
 tag=${1}
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..
-#-------------------------------------------------------------------------------
+
 "$dir/each" git checkout testing
+
 "$dir/each" git pull --no-recurse-submodules
 
 if ! git diff --quiet ; then
@@ -13,11 +14,15 @@ if ! git diff --quiet ; then
 fi
 
 "$dir/tag-create" "$tag"
+
 "$dir/each" git push
 
 "$dir/each" git checkout stable
+
 "$dir/each" git pull --no-recurse-submodules
+
 "$dir/each" git merge "$tag"
+
 "$dir/each" git push
 
 "$dir/each" sh -c 'test ! -f deploy || ./deploy'

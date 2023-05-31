@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-#-------------------------------------------------------------------------------
-ansible-lint --offline --strict \
+
+ansible-lint \
+    --offline \
+    --strict \
     --exclude lib/ \
     --exclude 'group_vars/*/*vault.yml' \
     --write

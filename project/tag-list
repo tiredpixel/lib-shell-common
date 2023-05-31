@@ -2,5 +2,5 @@
 set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-#-------------------------------------------------------------------------------
+
 "$dir/each" git tag -l 2>/dev/null | sort -Vu | tail

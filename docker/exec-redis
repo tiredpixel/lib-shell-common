@@ -8,7 +8,7 @@ opts=("$@")
 if [ -z "$cmd" ]; then
     cmd=redis-cli
 fi
-#-------------------------------------------------------------------------------
+
 docker compose exec \
     -u redis \
     redis "$cmd" "${opts[@]}"

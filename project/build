@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-#-------------------------------------------------------------------------------
+
 "$dir/each" sh -c 'test ! -f build || ./build'
 
 "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose up -d'

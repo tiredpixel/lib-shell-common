@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-#-------------------------------------------------------------------------------
-docker compose exec -T web /usr/local/bin/bundle lock
+
+docker compose exec \
+    -T \
+    web /usr/local/bin/bundle lock

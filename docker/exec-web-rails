@@ -9,5 +9,6 @@ if [ -z "$cmd" ]; then
     cmd=rails
     opts=(console)
 fi
-#-------------------------------------------------------------------------------
-docker compose exec web "$cmd" "${opts[@]}"
+
+docker compose exec \
+    web "$cmd" "${opts[@]}"

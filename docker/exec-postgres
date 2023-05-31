@@ -8,7 +8,7 @@ opts=("$@")
 if [ -z "$cmd" ]; then
     cmd=psql
 fi
-#-------------------------------------------------------------------------------
+
 docker compose exec \
     -u postgres \
     -w /var/lib/postgresql \

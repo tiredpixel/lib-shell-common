@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 self=$(realpath "${BASH_SOURCE[0]}")
 dir=$(dirname "$self")
-#-------------------------------------------------------------------------------
+
 function upgrade() {
     "$dir/../git/recursive" pull --no-recurse-submodules
     
@@ -27,7 +27,7 @@ function freeze() {
 function stop() {
     "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
 }
-#-------------------------------------------------------------------------------
+
 upgrade
 "$dir/build"
 freeze

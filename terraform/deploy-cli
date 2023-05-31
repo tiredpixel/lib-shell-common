@@ -2,5 +2,5 @@
 set -Eeuo pipefail
 
 f_plan=.terraform.plan
-#-------------------------------------------------------------------------------
+
 terraform apply $f_plan
