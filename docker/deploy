@@ -2,10 +2,13 @@
 set -Eeuo pipefail
 
 export DOCKER_BUILDKIT=1
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+release=$(git describe --abbrev=0)
 repo=$(<.dockerrepo)
 version=$(git describe)
-release=$(git describe --abbrev=0)
-tags=()
+
+tags=("$branch")
 
 if [ "$version" == "$release" ]; then
     r=$release
@@ -23,19 +26,6 @@ if [ "$version" == "$release" ]; then
     done
 fi
 
-commit_latest=$(git for-each-ref \
-    --sort=-committerdate --format="%(objectname)" refs/remotes/ | head -n1)
-commit_head=$(git rev-parse HEAD)
-
-if [ "$commit_head" == "$commit_latest" ]; then
-    tags+=(latest)
-fi
-
-echo "latest:  $commit_latest"
-echo "head:    $commit_head"
-echo "version: $version"
-echo "tags:    ${tags[*]}"
-
 args=()
 
 for tag in "${tags[@]}"; do
@@ -51,5 +41,7 @@ for tag in "${tags[@]}"; do
     docker push "$repo:$tag"
 done
 
+echo
 echo "version: $version"
+echo "repo:    $repo"
 echo "tags:    ${tags[*]}"
