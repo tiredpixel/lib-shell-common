@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+opts=("$@")
+
+exec docker compose "${opts[@]}"

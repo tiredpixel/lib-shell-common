@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+svc=$1
+shift 1
+cmd=${1:-}
+shift 1 || true
+opts1=()
+opts2=("$@")
+
+case $svc in
+    postgres)
+        opts1=(-u postgres -w /var/lib/postgresql)
+        cmd=${cmd:-psql}
+        ;;
+    redis)
+        opts1=(-u redis)
+        cmd=${cmd:-redis-cli}
+        ;;
+    *)
+        cmd=${cmd:-bash}
+        ;;
+esac
+
+exec docker compose exec "${opts1[@]}" "$svc" "$cmd" "${opts2[@]}"
