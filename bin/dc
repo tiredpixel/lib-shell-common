@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+cmd=$1
+shift 1
 opts=("$@")
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-exec docker compose "${opts[@]}"
+case $cmd in
+    build)
+        exec "$dir/../docker/build" "${opts[@]}"
+        ;;
+    deploy)
+        exec "$dir/../docker/deploy" "${opts[@]}"
+        ;;
+    upgrade)
+        exec "$dir/../docker/upgrade" "${opts[@]}"
+        ;;
+    *)
+        exec docker compose "$cmd" "${opts[@]}"
+        ;;
+esac
