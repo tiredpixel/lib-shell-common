@@ -2,4 +2,18 @@
 
 source /usr/share/bash-completion/completions/docker
 
-complete -F _docker dc dce
+_dc() {
+    COMP_WORDS=(docker compose "${COMP_WORDS[@]:1}")
+    COMP_CWORD=$((COMP_CWORD+1))
+    _docker
+    COMPREPLY+=(build deploy upgrade)
+}
+
+_dce() {
+    COMP_WORDS=(docker compose exec "${COMP_WORDS[@]:1}")
+    COMP_CWORD=$((COMP_CWORD+2))
+    _docker
+}
+
+complete -F _dc  dc
+complete -F _dce dce
