@@ -6,7 +6,6 @@ _dc() {
     COMP_WORDS=(docker compose "${COMP_WORDS[@]:1}")
     COMP_CWORD=$((COMP_CWORD+1))
     _docker
-    COMPREPLY+=(build deploy upgrade)
 }
 
 _dce() {
