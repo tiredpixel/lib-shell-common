@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+mkdir -p ~/.local/share/bash-completion/completions
+
+ln -s ~/lib-shell-common/docker/bash-completion ~/.local/share/bash-completion/completions/dc
+ln -s ~/lib-shell-common/docker/bash-completion ~/.local/share/bash-completion/completions/dce
