@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# For Bash completion:
+#
+#     echo 'complete -F _docker dc' >> ~/.bash_profile
+
 cmd=$1
 shift 1
 opts=("$@")
