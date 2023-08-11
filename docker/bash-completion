@@ -15,4 +15,4 @@ _dce() {
 }
 
 complete -F _dc  dc
-complete -F _dce dce
+complete -F _dce dce dcr
