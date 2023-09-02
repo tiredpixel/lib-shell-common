@@ -24,6 +24,10 @@ function freeze() {
     "$dir/each" sh -c 'test ! -f freeze || ./freeze'
 }
 
+function test-all() {
+    "$dir/each" sh -c 'test ! -f test-all || ./test-all'
+}
+
 function stop() {
     "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
 }
@@ -31,6 +35,7 @@ function stop() {
 upgrade
 "$dir/build"
 freeze
+test-all
 stop
 "$dir/build"
 stop
