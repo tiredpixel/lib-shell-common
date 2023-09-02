@@ -4,6 +4,18 @@ set -Eeuo pipefail
 self=$(realpath "${BASH_SOURCE[0]}")
 dir=$(dirname "$self")
 
+function freeze() {
+    "$dir/each" sh -c 'test ! -f freeze || ./freeze'
+}
+
+function stop() {
+    "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
+}
+
+function test-all() {
+    "$dir/each" sh -c 'test ! -f test-all || ./test-all'
+}
+
 function upgrade() {
     "$dir/../git/recursive" pull --no-recurse-submodules
     
@@ -20,22 +32,10 @@ function upgrade() {
     "
 }
 
-function freeze() {
-    "$dir/each" sh -c 'test ! -f freeze || ./freeze'
-}
-
-function test-all() {
-    "$dir/each" sh -c 'test ! -f test-all || ./test-all'
-}
-
-function stop() {
-    "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
-}
-
 upgrade
 "$dir/build"
-freeze
 test-all
+freeze
 stop
 "$dir/build"
 stop
