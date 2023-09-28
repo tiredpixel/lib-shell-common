@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-self=$(realpath "${BASH_SOURCE[0]}")
-dir=$(dirname "$self")
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 "$dir/../git/recursive" pull --no-recurse-submodules
 
-"$dir/each" sh -c "
-    make -q upgrade ; test $? -eq 2 || test \"$(realpath upgrade)\" = \"$self\" || make upgrade"
+"$dir/each-without-project" sh -c '
+    make -q upgrade ; test $? -eq 2 || make upgrade'
 
 make build
 
-"$dir/each" sh -c '
+"$dir/each-without-project" sh -c '
     make -q test ; test $? -eq 2 || make test'
 
-"$dir/each" sh -c '
+"$dir/each-without-project" sh -c '
     make -q upgrade-freeze ; test $? -eq 2 || make upgrade-freeze'
 
 "$dir/each" sh -c '

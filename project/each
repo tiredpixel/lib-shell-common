@@ -1,20 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-f_projects=.projects
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-if [ -f "$f_projects" ] ; then
-    while read -r module ; do
-        pushd "$module" >/dev/null
-        
-        echo -e "\n=== $module" >&2
-        "$@"
-        
-        popd >/dev/null
-    done < "$f_projects"
-fi
+"$dir/each-without-project" "$@"
 
-echo -e "\n=== $(basename "$PWD")" >&2
+echo "=== $(basename "$PWD")" >&2
 "$@"
 
 echo

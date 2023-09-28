@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+f_projects=.projects
+
+if [ -f "$f_projects" ] ; then
+    while read -r module ; do
+        pushd "$module" >/dev/null
+        
+        echo -e "\n=== $module" >&2
+        "$@"
+        
+        popd >/dev/null
+    done < "$f_projects"
+fi
+
+echo

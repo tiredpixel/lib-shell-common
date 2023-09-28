@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-"$dir/each" sh -c '
+"$dir/each-without-project" sh -c '
     make -q build ; test $? -eq 2 || make build'
 
 "$dir/each" sh -c '
