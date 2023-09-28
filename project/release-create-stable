@@ -25,4 +25,5 @@ fi
 
 "$dir/each" git push
 
-"$dir/each" sh -c 'test ! -f deploy || ./deploy'
+"$dir/each" sh -c '
+    make -q deploy ; test $? -eq 2 || make deploy'

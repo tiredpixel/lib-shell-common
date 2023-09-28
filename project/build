@@ -3,9 +3,11 @@ set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-"$dir/each" sh -c 'test ! -f build || ./build'
+"$dir/each" sh -c '
+    make -q build ; test $? -eq 2 || make build'
 
-"$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose up -d'
+"$dir/each" sh -c '
+    test ! -f docker-compose.yml || docker compose up -d'
 
 "$dir/../docker/ps-await-healthy"
 

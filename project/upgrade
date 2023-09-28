@@ -4,38 +4,23 @@ set -Eeuo pipefail
 self=$(realpath "${BASH_SOURCE[0]}")
 dir=$(dirname "$self")
 
-function freeze() {
-    "$dir/each" sh -c 'test ! -f freeze || ./freeze'
-}
+"$dir/../git/recursive" pull --no-recurse-submodules
 
-function stop() {
-    "$dir/each" sh -c 'test ! -f docker-compose.yml || docker compose stop'
-}
+"$dir/each" sh -c "
+    make -q upgrade ; test $? -eq 2 || test \"$(realpath upgrade)\" = \"$self\" || make upgrade"
 
-function test-all() {
-    "$dir/each" sh -c 'test ! -f test-all || ./test-all'
-}
+make build
 
-function upgrade() {
-    "$dir/../git/recursive" pull --no-recurse-submodules
-    
-    "$dir/each" truncate -c -s0 \
-        Gemfile.lock \
-        cabal.config \
-        cabal.project.freeze \
-        yarn.lock
-    
-    "$dir/each" sh -c "
-        test ! -f upgrade ||
-        test \"$(realpath upgrade)\" = \"$self\" ||
-        ./upgrade
-    "
-}
+"$dir/each" sh -c '
+    make -q test ; test $? -eq 2 || make test'
 
-upgrade
-"$dir/build"
-test-all
-freeze
-stop
-"$dir/build"
-stop
+"$dir/each" sh -c '
+    make -q upgrade-freeze ; test $? -eq 2 || make upgrade-freeze'
+
+"$dir/each" sh -c '
+    test ! -f docker-compose.yml || docker compose stop'
+
+make build
+
+"$dir/each" sh -c '
+    test ! -f docker-compose.yml || docker compose stop'
