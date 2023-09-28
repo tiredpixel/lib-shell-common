@@ -13,7 +13,7 @@ if [ -f "$f_projects" ] ; then
         
         echo_line
         echo -e "$module\n" >&2
-        "$@"
+        echo | "$@"
         
         popd >/dev/null
     done < "$f_projects"
