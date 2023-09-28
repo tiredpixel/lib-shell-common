@@ -18,4 +18,4 @@ fi
 "$dir/each" git push
 
 "$dir/each-without-project" sh -c '
-    make -q deploy ; test $? -eq 2 || make deploy'
+    ! make -n deploy || make deploy'

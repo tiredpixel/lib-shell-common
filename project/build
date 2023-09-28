@@ -8,7 +8,7 @@ function echo_line() {
 }
 #-------------------------------------------------------------------------------
 "$dir/each-without-project" sh -c '
-    make -q build ; test $? -eq 2 || make build'
+    ! make -n build || make build'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "START\n"
