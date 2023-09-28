@@ -9,5 +9,3 @@ while test ! -z "$(docker ps -f health=starting -f health=unhealthy -q)"; do
     
     sleep 1
 done
-
-echo

@@ -3,9 +3,12 @@ set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+function echo_line() {
+    printf %"$(tput cols)"s | tr " " "-"
+}
+
 "$dir/each-without-project" "$@"
 
-echo "=== $(basename "$PWD")" >&2
+echo_line
+echo -e "$(basename "$PWD")\n" >&2
 "$@"
-
-echo

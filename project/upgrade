@@ -3,23 +3,54 @@ set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+function echo_line() {
+    printf %"$(tput cols)"s | tr " " "="
+}
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "PULL\n"
+
 "$dir/../git/recursive" pull --no-recurse-submodules
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "UPGRADE\n"
 
 "$dir/each-without-project" sh -c '
     make -q upgrade ; test $? -eq 2 || make upgrade'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "BUILD 1\n"
 
 make build
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "TEST\n"
 
 "$dir/each-without-project" sh -c '
     make -q test ; test $? -eq 2 || make test'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "UPGRADE-FREEZE\n"
 
 "$dir/each-without-project" sh -c '
     make -q upgrade-freeze ; test $? -eq 2 || make upgrade-freeze'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "STOP 1\n"
 
 "$dir/each" sh -c '
     test ! -f docker-compose.yml || docker compose stop'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "BUILD 2\n"
 
 make build
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "STOP 2\n"
 
 "$dir/each" sh -c '
     test ! -f docker-compose.yml || docker compose stop'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "COMPLETED\n"
