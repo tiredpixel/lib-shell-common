@@ -16,7 +16,7 @@ echo_line
 echo -e "UPGRADE\n"
 
 "$dir/each-without-project" sh -c '
-    ! make -n upgrade || make upgrade'
+    make -q upgrade ; test $? -eq 2 || make upgrade'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "BUILD 1\n"
@@ -27,13 +27,13 @@ echo_line
 echo -e "TEST\n"
 
 "$dir/each-without-project" sh -c '
-    ! make -n test || make test'
+    make -q test ; test $? -eq 2 || make test'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "UPGRADE-FREEZE\n"
 
 "$dir/each-without-project" sh -c '
-    ! make -n upgrade-freeze || make upgrade-freeze'
+    make -q upgrade-freeze ; test $? -eq 2 || make upgrade-freeze'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "STOP 1\n"
