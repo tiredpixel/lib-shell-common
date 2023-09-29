@@ -8,13 +8,14 @@ function echo_line() {
 }
 
 if [ -f "$f_projects" ] ; then
-    while read -r module ; do
-        pushd "$module" >/dev/null
+    mapfile -t projects < "$f_projects"
+    for project in "${projects[@]}" ; do
+        pushd "$project" >/dev/null
         
         echo_line
-        echo -e "$module\n" >&2
+        echo -e "$project\n" >&2
         "$@"
         
         popd >/dev/null
-    done < "$f_projects"
+    done
 fi
