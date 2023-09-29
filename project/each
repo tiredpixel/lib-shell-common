@@ -11,4 +11,4 @@ function echo_line() {
 
 echo_line
 echo -e "$(basename "$PWD")\n" >&2
-echo | "$@"
+"$@"
