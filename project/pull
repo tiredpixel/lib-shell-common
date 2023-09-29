@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
+git pull --no-recurse-submodules
+
+# shellcheck disable=SC2016
+"$dir/each-without-project" sh -c '
+    git submodule foreach --recursive '\''
+        branch=$(git symbolic-ref --short refs/remotes/origin/HEAD | cut -d'\''/'\'' -f2)
+        git checkout "$branch"
+        git pull --no-recurse-submodules'\'''
