@@ -8,7 +8,7 @@ function echo_line() {
 }
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "PULL\n"
+echo -e "REPO PULL\n"
 
 "$dir/../git/recursive" pull --no-recurse-submodules
 #-------------------------------------------------------------------------------
@@ -19,38 +19,30 @@ echo -e "UPGRADE\n"
     make -q upgrade ; test $? -eq 2 || make upgrade'
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "BUILD 1\n"
+echo -e "UPGRADE START\n"
 
-make build
+"$dir/start"
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "TEST\n"
+echo -e "UPGRADE STOP\n"
+
+"$dir/stop"
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "REBUILD\n"
 
 "$dir/each-without-project" sh -c '
-    make -q test ; test $? -eq 2 || make test'
+    make -q build ; test $? -eq 2 || make build'
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "UPGRADE-FREEZE\n"
+echo -e "REBUILD START\n"
 
-"$dir/each-without-project" sh -c '
-    make -q upgrade-freeze ; test $? -eq 2 || make upgrade-freeze'
+"$dir/start"
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "STOP 1\n"
+echo -e "REBUILD STOP\n"
 
-"$dir/each" sh -c '
-    test ! -f docker-compose.yml || docker compose stop'
-#-------------------------------------------------------------------------------
-echo_line
-echo -e "BUILD 2\n"
-
-make build
-#-------------------------------------------------------------------------------
-echo_line
-echo -e "STOP 2\n"
-
-"$dir/each" sh -c '
-    test ! -f docker-compose.yml || docker compose stop'
+"$dir/stop"
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "COMPLETED\n"
