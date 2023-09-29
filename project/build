@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
+function echo_line() {
+    printf %"$(tput cols)"s | tr " " "="
+}
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "REPO PULL\n"
+
+"$dir/../git/recursive" pull --no-recurse-submodules
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "BUILD\n"
+
+"$dir/each-without-project" sh -c '
+    make -q build ; test $? -eq 2 || make build'
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "BUILD START\n"
+
+"$dir/start"
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "BUILD STOP\n"
+
+"$dir/stop"
+#-------------------------------------------------------------------------------
+echo_line
+echo -e "COMPLETED\n"
