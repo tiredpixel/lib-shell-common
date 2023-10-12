@@ -6,12 +6,14 @@ shift 1
 cmd=${1:-}
 shift 1 || true
 opts1=()
-opts2=("$@")
+opts2=()
+opts3=("$@")
 
 case $svc in
     mysql)
         opts1=(-u mysql -w /var/lib/mysql)
-        cmd=${cmd:-mysql -u root --password=password}
+        cmd=${cmd:-mysql}
+        opts2=(-u root --password=password)
         ;;
     postgres)
         opts1=(-u postgres -w /var/lib/postgresql)
@@ -26,4 +28,4 @@ case $svc in
         ;;
 esac
 
-exec docker compose exec "${opts1[@]}" "$svc" "$cmd" "${opts2[@]}"
+exec docker compose exec "${opts1[@]}" "$svc" "$cmd" "${opts2[@]}" "${opts3[@]}"
