@@ -9,6 +9,10 @@ opts1=()
 opts2=("$@")
 
 case $svc in
+    mysql)
+        opts1=(-u mysql -w /var/lib/mysql)
+        cmd=${cmd:-mysql -u root --password=password}
+        ;;
     postgres)
         opts1=(-u postgres -w /var/lib/postgresql)
         cmd=${cmd:-psql}
