@@ -19,28 +19,18 @@ echo -e "UPGRADE\n"
     make -q upgrade ; test $? -eq 2 || make upgrade'
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "UPGRADE START\n"
-
-"$dir/start"
-#-------------------------------------------------------------------------------
-echo_line
-echo -e "UPGRADE STOP\n"
-
-"$dir/stop"
-#-------------------------------------------------------------------------------
-echo_line
 echo -e "REBUILD\n"
 
 "$dir/each-without-project" sh -c '
     make -q build ; test $? -eq 2 || make build'
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "REBUILD START\n"
+echo -e "START\n"
 
 "$dir/start"
 #-------------------------------------------------------------------------------
 echo_line
-echo -e "REBUILD STOP\n"
+echo -e "STOP\n"
 
 "$dir/stop"
 #-------------------------------------------------------------------------------
