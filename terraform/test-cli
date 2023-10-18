@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 f_plan=.terraform.plan
 
-terraform fmt -recursive
+terraform fmt -recursive -check
 
 terraform init
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-terraform fmt -recursive
+terraform fmt -recursive -check
 
 terraform init
 
