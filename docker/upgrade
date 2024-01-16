@@ -8,10 +8,11 @@ grep -E '^# FROMFREEZE (.*)$' "$dockerfile" | while read -r line; do
     repo=${data%:*}
     tag=${data#*:}
     
+    echo "Pulling $repo:$tag"
+    docker pull "$repo:$tag"
+    
     echo "Digesting $repo:$tag"
-    
-    digest=$(docker pull "$repo:$tag" | grep '^Digest: ' | cut -d' ' -f2)
-    
+    digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$repo:$tag" | cut -d '@' -f2)
     echo "  => $digest"
     
     sed -i -E "s|^FROM ${repo}[:@]\S+(.*)$|FROM $repo@$digest\1|g" "$dockerfile"
