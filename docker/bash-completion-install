@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
 mkdir -p ~/.local/share/bash-completion/completions
 
-ln -sf ~/lib-shell-common/docker/bash-completion ~/.local/share/bash-completion/completions/dc
-ln -sf ~/lib-shell-common/docker/bash-completion ~/.local/share/bash-completion/completions/dce
-ln -sf ~/lib-shell-common/docker/bash-completion ~/.local/share/bash-completion/completions/dcr
+ln -sf "$dir/bash-completion" ~/.local/share/bash-completion/completions/dc
+ln -sf "$dir/bash-completion" ~/.local/share/bash-completion/completions/dce
+ln -sf "$dir/bash-completion" ~/.local/share/bash-completion/completions/dcr
