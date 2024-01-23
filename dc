@@ -8,13 +8,13 @@ dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 case $cmd in
     build)
-        exec "$dir/../docker/build" "${opts[@]}"
+        exec "$dir/docker/build" "${opts[@]}"
         ;;
     deploy)
-        exec "$dir/../docker/deploy" "${opts[@]}"
+        exec "$dir/docker/deploy" "${opts[@]}"
         ;;
     upgrade)
-        exec "$dir/../docker/upgrade" "${opts[@]}"
+        exec "$dir/docker/upgrade" "${opts[@]}"
         ;;
     *)
         exec docker compose "$cmd" "${opts[@]}"
