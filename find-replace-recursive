@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+dst=$1
+a=$2
+b=$3
+#-------------------------------------------------------------------------------
+find "$dst" \( -type d -name .git -prune \) -o -type f -print0 |
+    xargs -0 sed -i "s|$a|$b|g"
