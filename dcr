@@ -13,7 +13,7 @@ case $svc in
     mysql)
         opts1=(-u mysql -w /var/lib/mysql)
         cmd=${cmd:-mysql}
-        opts2=(-u root --password=root)
+        opts2=(-u user --password=user)
         ;;
     postgres)
         opts1=(-u postgres -w /var/lib/postgresql)
