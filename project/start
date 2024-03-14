@@ -4,7 +4,7 @@ set -Eeuo pipefail
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
 "$dir/each" sh -c '
-    test ! -f docker-compose.yml || docker compose up -d'
+    test ! -f docker-compose.yml || docker compose up -d --pull always'
 
 "$dir/../docker/ps-await-healthy"
 
