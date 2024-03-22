@@ -8,7 +8,7 @@ _dc() {
     local cur prev words cword
     _get_comp_words_by_ref -n : cur prev words cword
     words=(dc compose "${words[@]:1}")
-    _docker_compose
+    declare -F _docker_compose >/dev/null && _docker_compose
     eval "$previous_extglob_setting"
 }
 
@@ -18,7 +18,7 @@ _dce() {
     local cur prev words cword
     _get_comp_words_by_ref -n : cur prev words cword
     words=(dce compose exec "${words[@]:1}")
-    _docker_compose
+    declare -F _docker_compose >/dev/null && _docker_compose
     eval "$previous_extglob_setting"
 }
 
@@ -28,7 +28,7 @@ _dcr() {
     local cur prev words cword
     _get_comp_words_by_ref -n : cur prev words cword
     words=(dcr compose run "${words[@]:1}")
-    _docker_compose
+    declare -F _docker_compose >/dev/null && _docker_compose
     eval "$previous_extglob_setting"
 }
 
