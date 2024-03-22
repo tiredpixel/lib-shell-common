@@ -3,16 +3,35 @@
 source /usr/share/bash-completion/completions/docker
 
 _dc() {
-    COMP_WORDS=(docker compose "${COMP_WORDS[@]:1}")
-    COMP_CWORD=$((COMP_CWORD+1))
-    _docker
+    local previous_extglob_setting=$(shopt -p extglob)
+    shopt -s extglob
+    local cur prev words cword
+    _get_comp_words_by_ref -n : cur prev words cword
+    words=(dc compose "${words[@]:1}")
+    _docker_compose
+    eval "$previous_extglob_setting"
 }
 
 _dce() {
-    COMP_WORDS=(docker compose exec "${COMP_WORDS[@]:1}")
-    COMP_CWORD=$((COMP_CWORD+2))
-    _docker
+    local previous_extglob_setting=$(shopt -p extglob)
+    shopt -s extglob
+    local cur prev words cword
+    _get_comp_words_by_ref -n : cur prev words cword
+    words=(dce compose exec "${words[@]:1}")
+    _docker_compose
+    eval "$previous_extglob_setting"
+}
+
+_dcr() {
+    local previous_extglob_setting=$(shopt -p extglob)
+    shopt -s extglob
+    local cur prev words cword
+    _get_comp_words_by_ref -n : cur prev words cword
+    words=(dcr compose run "${words[@]:1}")
+    _docker_compose
+    eval "$previous_extglob_setting"
 }
 
 complete -F _dc  dc
-complete -F _dce dce dcr
+complete -F _dce dce
+complete -F _dcr dcr
