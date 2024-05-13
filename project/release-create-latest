@@ -4,7 +4,7 @@ set -Eeuo pipefail
 tag=${1}
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-"$dir/each" git checkout latest
+"$dir/each" git checkout latest --no-recurse-submodules
 
 "$dir/each" git pull --no-recurse-submodules
 
