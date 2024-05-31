@@ -34,10 +34,13 @@ for tag in "${tags[@]}"; do
     args+=("$repo:$tag")
     caches+=("--cache-from")
     caches+=("$repo:$tag")
+    caches+=("--cache-from")
+    caches+=("$repo:$tag.cache")
+    caches+=("--cache-to")
+    caches+=("type=registry,mode=max,ref=$repo:$tag.cache")
 done
 
 docker build \
-    --build-arg BUILDKIT_INLINE_CACHE=1 \
     --build-arg GIT_DESCRIBE="$(git describe)" \
     "${caches[@]}" \
     "${args[@]}" .
