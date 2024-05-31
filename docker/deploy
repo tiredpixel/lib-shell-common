@@ -27,14 +27,19 @@ if [ "$version" == "$release" ]; then
 fi
 
 args=()
+caches=()
 
 for tag in "${tags[@]}"; do
     args+=("-t")
     args+=("$repo:$tag")
+    caches+=("--cache-from")
+    caches+=("$repo:$tag")
 done
 
 docker build \
+    --build-arg BUILDKIT_INLINE_CACHE=1 \
     --build-arg GIT_DESCRIBE="$(git describe)" \
+    "${caches[@]}" \
     "${args[@]}" .
 
 for tag in "${tags[@]}"; do
