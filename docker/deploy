@@ -8,7 +8,7 @@ release=$(git describe --abbrev=0)
 repo=$(<.dockerrepo)
 version=$(git describe)
 
-tags=("$branch")
+tags=("${branch//\//-}")
 
 if [ "$version" == "$release" ]; then
     r=$release
