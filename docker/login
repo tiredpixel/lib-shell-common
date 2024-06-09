@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
