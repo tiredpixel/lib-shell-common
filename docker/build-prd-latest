@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/init"
+
 docker build \
   --target prd \
   --cache-from "$REPO:$TAG.dev" \
