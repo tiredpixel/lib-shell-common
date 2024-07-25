@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-yq -i -P 'sort_keys(..)' "$@"
+yq -P 'sort_keys(..)' "$@"
