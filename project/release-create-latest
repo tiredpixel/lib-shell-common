@@ -15,4 +15,4 @@ fi
 
 "$dir/tag-create" "$tag"
 
-"$dir/each" git push --no-recurse-submodules
+"$dir/each" git push
