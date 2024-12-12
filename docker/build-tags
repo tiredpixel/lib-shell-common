@@ -3,7 +3,11 @@ set -Eeuo pipefail
 
 export DOCKER_BUILDKIT=1
 
-branch=$(git rev-parse --abbrev-ref HEAD)
+if [ -n "${CIRCLE_BRANCH:-}" ]; then
+    branch=$CIRCLE_BRANCH
+else
+    branch=$(git rev-parse --abbrev-ref HEAD)
+fi
 release=$(git describe --abbrev=0)
 repo=$(<.dockerrepo)
 version=$(git describe)
