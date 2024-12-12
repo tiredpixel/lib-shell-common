@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/init"
+
 docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
