@@ -5,8 +5,6 @@ export DOCKER_BUILDKIT=1
 
 if [ -n "${CIRCLE_BRANCH:-}" ]; then
     branch=$CIRCLE_BRANCH
-elif [ -n "${GIT_BRANCH:-}" ]; then
-    branch=$GIT_BRANCH
 else
     branch=$(git rev-parse --abbrev-ref HEAD)
 fi
