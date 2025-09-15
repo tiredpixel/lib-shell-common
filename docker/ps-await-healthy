@@ -8,7 +8,7 @@ while test ! -z "$(docker ps -f health=starting -f health=unhealthy -q)"; do
     done < <(docker ps \
         -f health=starting -f health=unhealthy --format '{{.Names}}')
 
-    echo -ne "\r\e[2KAwaiting ${SECONDS}s ${cNames[*]}"
+    printf "\r\033[2KAwaiting %ss %s" "${SECONDS}" "${cNames[*]}"
     
     sleep 1
 done
