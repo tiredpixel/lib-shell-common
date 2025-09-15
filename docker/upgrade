@@ -7,13 +7,20 @@ grep -E '^# FROMFREEZE (.*)$' "$dockerfile" | while read -r line; do
     data=${line#"# FROMFREEZE "}
     repo=${data%:*}
     tag=${data#*:}
-    
+
     echo "Pulling $repo:$tag"
     docker pull "$repo:$tag"
-    
+
     echo "Digesting $repo:$tag"
     digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$repo:$tag" | cut -d '@' -f2)
     echo "  => $digest"
-    
-    sed -i -E "s|^FROM ${repo}[:@]\S+(.*)$|FROM $repo@$digest\1|g" "$dockerfile"
+
+    # Detect GNU or BSD sed and use the appropriate syntax
+    if sed --version >/dev/null 2>&1; then
+        # GNU sed
+        sed -i -E "s|^FROM ${repo}[:@]\S+(.*)$|FROM $repo@$digest\1|g" "$dockerfile"
+    else
+        # BSD/macOS sed
+        sed -i '' -E "s|^FROM ${repo}[:@][^ ]*(.*)$|FROM $repo@$digest\\1|g" "$dockerfile"
+    fi
 done
