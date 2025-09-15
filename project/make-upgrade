@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Euo pipefail
+set -Eeu
 
 make -q upgrade
 test $? -eq 2 || make upgrade
