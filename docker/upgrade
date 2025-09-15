@@ -15,5 +15,5 @@ grep -E '^# FROMFREEZE (.*)$' "$dockerfile" | while read -r line; do
     digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$repo:$tag" | cut -d '@' -f2)
     echo "  => $digest"
     
-    sed -i '' -E "s|^FROM ${repo}[:@][^ ]+(.*)$|FROM $repo@$digest\\1|g" "$dockerfile"
+    sed -i -E "s|^FROM ${repo}[:@]\S+(.*)$|FROM $repo@$digest\1|g" "$dockerfile"
 done
