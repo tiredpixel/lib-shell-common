@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeu
+set -Eeuo pipefail
 
 make -q build
 test $? -eq 2 || make build
