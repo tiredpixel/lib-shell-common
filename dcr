@@ -28,10 +28,4 @@ case $svc in
         ;;
 esac
 
-args=()
-if (( ${#opts1[@]} )); then args+=("${opts1[@]}"); fi
-args+=("$svc" "$cmd")
-if (( ${#opts2[@]} )); then args+=("${opts2[@]}"); fi
-if (( ${#opts3[@]} )); then args+=("${opts3[@]}"); fi
-
-exec docker compose run "${args[@]}"
+exec docker compose run "${opts1[@]}" "$svc" "$cmd" "${opts2[@]}" "${opts3[@]}"

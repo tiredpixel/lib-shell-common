@@ -5,20 +5,18 @@ cmd=$1
 shift 1
 opts=("$@")
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-args=()
-if (( ${#opts[@]} )); then args+=("${opts[@]}"); fi
 
 case $cmd in
     build)
-        exec "$dir/docker/build-compose" "${args[@]}"
+        exec "$dir/docker/build-compose" "${opts[@]}"
         ;;
     deploy)
-        exec "$dir/docker/build-tags" "${args[@]}"
+        exec "$dir/docker/build-tags" "${opts[@]}"
         ;;
     upgrade)
-        exec "$dir/docker/upgrade" "${args[@]}"
+        exec "$dir/docker/upgrade" "${opts[@]}"
         ;;
     *)
-        exec docker compose "$cmd" "${args[@]}"
+        exec docker compose "$cmd" "${opts[@]}"
         ;;
 esac
