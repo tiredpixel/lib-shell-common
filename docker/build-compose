@@ -3,10 +3,5 @@ set -Eeuo pipefail
 
 opts=("$@")
 
-if (( ${#opts[@]} )); then
-    docker compose "${opts[@]}" build \
-        --build-arg GIT_DESCRIBE="$(git describe)"
-else
-    docker compose build \
-        --build-arg GIT_DESCRIBE="$(git describe)"
-fi
+docker compose "${opts[@]}" build \
+    --build-arg GIT_DESCRIBE="$(git describe)"
