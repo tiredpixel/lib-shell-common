@@ -15,12 +15,14 @@ echo -e "PULL\n"
 echo_line
 echo -e "UPGRADE\n"
 
-"$dir/each-without-project" script -q -c 'make -q upgrade ; test $? -eq 2 || make upgrade' /dev/null
+"$dir/each-without-project" sh -c '
+    make -q upgrade ; test $? -eq 2 || make upgrade'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "REBUILD\n"
 
-"$dir/each-without-project" script -q -c 'make -q build ; test $? -eq 2 || make build' /dev/null
+"$dir/each-without-project" sh -c '
+    make -q build ; test $? -eq 2 || make build'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "START\n"
