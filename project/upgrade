@@ -18,11 +18,11 @@ echo -e "UPGRADE\n"
 "$dir/each-without-project" sh -c '
         make -q upgrade ; test $? -eq 2 || \
         (\
-            if script --version 2>&1 | grep -q GNU; then \
+            if script --version 2>&1 ; then \
                 script -q -c "make upgrade" /dev/null; \
             else \
                 script /dev/null make upgrade; \
-            fi\
+            fi \
         )'
 #-------------------------------------------------------------------------------
 echo_line
