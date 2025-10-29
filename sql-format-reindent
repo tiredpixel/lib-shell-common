@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -Eeuo pipefail
-
-sqlformat -k upper -i lower -a -
