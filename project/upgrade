@@ -15,21 +15,34 @@ echo -e "PULL\n"
 echo_line
 echo -e "UPGRADE\n"
 
+# shellcheck disable=SC2016
 "$dir/each-without-project" sh -c '
-        make -q upgrade ; test $? -eq 2 || \
-        (\
-            if script --version 2>&1 ; then \
-                script -q -c "make upgrade" /dev/null; \
-            else \
-                script /dev/null make upgrade; \
-            fi \
-        )'
+        make -q upgrade
+        status=$?
+        if [ $status -eq 0 ]; then
+            exit 0
+        elif [ $status -eq 2 ]; then
+            exit 1
+        fi
+        if script --version 2>&1 >/dev/null; then
+            script -q -c "make upgrade" /dev/null
+        else
+            script /dev/null make upgrade
+        fi'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "REBUILD\n"
 
+# shellcheck disable=SC2016
 "$dir/each-without-project" sh -c '
-    make -q build ; test $? -eq 2 || make build'
+    make -q build
+    status=$?
+    if [ $status -eq 0 ]; then
+        exit 0
+    elif [ $status -eq 2 ]; then
+        exit 1
+    fi
+    make build'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "START\n"
