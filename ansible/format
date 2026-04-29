@@ -6,4 +6,4 @@ ansible-lint \
     --strict \
     --exclude lib/ \
     --exclude 'group_vars/*/*vault.yml' \
-    --write
+    --fix
