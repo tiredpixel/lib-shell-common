@@ -24,6 +24,9 @@ function cmd_list() {
 		{
 		    "ungrouped": {
 		        "hosts": $hosts
+		    },
+		    "_meta": {
+		        "hostvars": {}
 		    }
 		}
 	EOF
