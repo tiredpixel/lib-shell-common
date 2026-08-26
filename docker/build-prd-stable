@@ -4,6 +4,11 @@ shopt -s inherit_errexit failglob
 
 source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/init"
 
+# Resolved here rather than inline, for the reason docker/build-compose states:
+# an argument's command substitution cannot fail the command it is an argument
+# to, so an untagged repo stamped the image with nothing and said only fatal:.
+describe=$(git describe 2>/dev/null || true)
+
 docker build \
   --target prd \
   --cache-from "$REPO:$TAG.dev" \
@@ -15,7 +20,7 @@ docker build \
   --cache-from "$REPO:stable.dev" \
   --cache-from "$REPO:stable.prd" \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
-  --build-arg GIT_DESCRIBE="$(git describe)" \
+  --build-arg GIT_DESCRIBE="$describe" \
   -t "$REPO:$TAG.prd" .
 
 docker push "$REPO:$TAG.prd"

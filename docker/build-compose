@@ -4,5 +4,12 @@ shopt -s inherit_errexit failglob
 
 opts=("$@")
 
+# git describe fails in a repo carrying no tag, and a command substitution in
+# an argument cannot fail the command it is an argument to -- so the build went
+# ahead with an empty stamp, a fatal: on stderr its only sign. Empty is the
+# right value for an untagged working copy; what it must not be is accidental.
+# Engine's bin/build refuses an empty one at the point that actually stamps.
+describe=$(git describe 2>/dev/null || true)
+
 docker compose "${opts[@]}" build \
-    --build-arg GIT_DESCRIBE="$(git describe)"
+    --build-arg GIT_DESCRIBE="$describe"
