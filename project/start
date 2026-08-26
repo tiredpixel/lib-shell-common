@@ -3,8 +3,17 @@ set -Eeuo pipefail
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+# Two questions, cheapest first: is this a compose project, and has it
+# anything to bring up. They cannot be folded into one -- compose resolves a
+# project from any directory inside it, so dropping the file test would let a
+# project carrying none adopt an ancestor's. The second catches services that
+# all sit behind a profile, which selects nothing and which compose calls an
+# error rather than nothing to do.
+# shellcheck disable=SC2016
 "$dir/each" sh -c '
-    test ! -f docker-compose.yml || docker compose up -d --pull always'
+    test ! -f docker-compose.yml ||
+        test -z "$(docker compose config --services)" ||
+        docker compose up -d --pull always'
 
 "$dir/../docker/ps-await-healthy"
 
