@@ -8,15 +8,25 @@ function echo_line() {
     printf %"$(tput cols)"s | tr " " "-"
 }
 
+# The list is read on fd 3, not stdin, and fd 3 is closed to the child. On
+# stdin the sweep hands its own input to every command it runs: anything that
+# reads stdin drains the remaining projects, the next read sees EOF, and the
+# loop ends early having reported nothing wrong. `script`, which project/upgrade
+# wraps make in to keep a tty, does exactly that -- it forwards stdin to the pty
+# it creates, so an upgrade swept one project and silently skipped the rest.
+#
+# The child keeps the terminal on stdin rather than /dev/null, which `script`
+# needs to forward keystrokes and a git credential or passphrase prompt needs to
+# be answerable at all.
 if [ -f "$f_projects" ] ; then
-    while IFS= read -r project || [ -n "$project" ]; do
+    while IFS= read -r project <&3 || [ -n "$project" ]; do
         [ -z "$project" ] && continue
         pushd "$project" >/dev/null
 
         echo_line
         echo -e "$project\n" >&2
-        "$@"
+        "$@" 3<&-
 
         popd >/dev/null
-    done < "$f_projects"
+    done 3< "$f_projects"
 fi
