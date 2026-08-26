@@ -4,9 +4,22 @@ shopt -s inherit_errexit failglob
 
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
+f_projects=.projects
+
 function echo_line() {
     printf %"$(tput cols)"s | tr " " "="
 }
+
+# The sweep is defined by this list, so its absence is a broken checkout
+# rather than an empty one: every stage below would find nothing to do, and
+# the run would still reach COMPLETED having done none of it.
+# project/each-without-project stays tolerant of a missing list, because
+# project/start and project/stop reach the current project through
+# project/each and remain meaningful without one.
+if [ ! -f "$f_projects" ]; then
+    echo "$PWD: no $f_projects, so $(basename "$0") has nothing to sweep" >&2
+    exit 1
+fi
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "PULL\n"
@@ -16,21 +29,21 @@ echo -e "PULL\n"
 echo_line
 echo -e "UPGRADE\n"
 
-"$dir/each-without-project" sh -c '
-        make -q upgrade ; test $? -eq 2 || \
-        (\
-            if script --version 2>&1 >/dev/null; then \
-                script -q -e -c "make upgrade" /dev/null; \
-            else \
-                script -e /dev/null make upgrade; \
-            fi \
-        )'
+# make runs under `script` so the tools it drives still see a tty; -e so the
+# status carried back out is make's own rather than script's, which is what
+# tells the sweep an upgrade failed. Which project declares the target is
+# make-if-declared's question, not this one's.
+"$dir/each-without-project" "$dir/make-if-declared" upgrade sh -c '
+    if script --version >/dev/null 2>&1; then
+        script -q -e -c "make upgrade" /dev/null
+    else
+        script -e /dev/null make upgrade
+    fi'
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "REBUILD\n"
 
-"$dir/each-without-project" sh -c '
-    make -q build ; test $? -eq 2 || make build'
+"$dir/each-without-project" "$dir/make-if-declared" build
 #-------------------------------------------------------------------------------
 echo_line
 echo -e "START\n"

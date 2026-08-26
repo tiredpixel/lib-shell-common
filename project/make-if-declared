@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+#
+# Runs one make target for the project this is called in, if that project
+# declares it. The sweeps in project/build and project/upgrade reach every
+# project through it.
+#
+# The decision cannot be taken from `make -q`'s exit status, which is what this
+# replaces: it answers 2 for every error it meets -- a target it holds no rule
+# for, a Makefile it cannot parse, a directory holding no Makefile at all -- so
+# reading 2 as "nothing to do here" drops a project whose Makefile is broken
+# out of the sweep and reports success having skipped it. An uninitialised
+# submodule is an empty directory, and looks exactly the same.
+set -Eeuo pipefail
+shopt -s inherit_errexit failglob
+
+target=$1
+shift
+
+# Defaults to the target just asked about. project/upgrade passes a command
+# instead, because it runs make under `script` to hold a tty.
+if [ "$#" -eq 0 ]; then
+    set -- make "$target"
+fi
+
+# Asked separately because make cannot answer it: "No rule to make target" is
+# what it says both for a Makefile lacking the rule and for no Makefile at all,
+# and only the first of those is a project with nothing to do.
+if [ ! -f Makefile ] && [ ! -f makefile ] && [ ! -f GNUmakefile ]; then
+    echo "$PWD: no Makefile, so make $target cannot be swept here" >&2
+    exit 1
+fi
+
+# -q runs nothing. It answers 0 when the target is up to date and 1 when it
+# needs remaking, and either means the rule exists, which is the whole question
+# here. stdout is dropped and stderr kept, because the wording of the
+# diagnostic is what separates the two failures below.
+err=$(make -q "$target" 2>&1 >/dev/null) && status=0 || status=$?
+
+case $status in
+    0 | 1)
+        exec "$@"
+        ;;
+esac
+
+# GNU make and BSD make word this differently, and neither gives it an exit
+# status of its own. Anything else make said is a fault in the project, and
+# stops the sweep rather than quietly narrowing it.
+case $err in
+    *"No rule to make target"* | *"don't know how to make"*)
+        exit 0
+        ;;
+esac
+
+printf '%s\n' "$err" >&2
+exit 1
