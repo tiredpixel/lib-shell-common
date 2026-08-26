@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -Eeo pipefail
+set -Eeuo pipefail
+shopt -s inherit_errexit failglob
 
 svc=$1
 shift 1
