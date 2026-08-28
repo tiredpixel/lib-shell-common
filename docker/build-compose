@@ -8,7 +8,8 @@ opts=("$@")
 # an argument cannot fail the command it is an argument to -- so the build went
 # ahead with an empty stamp, a fatal: on stderr its only sign. Empty is the
 # right value for an untagged working copy; what it must not be is accidental.
-# Engine's bin/build refuses an empty one at the point that actually stamps.
+# A consumer that stamps this value should refuse an empty one at the point
+# that actually stamps.
 describe=$(git describe 2>/dev/null || true)
 
 docker compose "${opts[@]}" build \
