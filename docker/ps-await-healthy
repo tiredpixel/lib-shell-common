@@ -2,15 +2,30 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
-while test ! -z "$(docker ps -f health=starting -f health=unhealthy -q)"; do
-    cNames=()
-    while IFS= read -r name; do
-        cNames+=("$name")
-    done < <(docker ps \
-        -f health=starting -f health=unhealthy --format '{{.Names}}')
+# Every container on the daemon rather than one compose project's, because
+# project/start calls this from the directory holding .projects, which need not
+# carry a compose file of its own -- so there is no single project here to ask
+# about. That makes an unrelated unhealthy container this wait's problem, which
+# is why it is bounded: it had no limit and no iteration cap, so one
+# permanently unhealthy container elsewhere on the machine hung the caller for
+# as long as it was left there. Override the bound with AWAIT_HEALTHY_TIMEOUT.
+timeout=${AWAIT_HEALTHY_TIMEOUT:-300}
 
-    printf "\r\033[2KAwaiting %ss %s" "${SECONDS}" "${cNames[*]}"
-    
+while true; do
+    names=$(docker ps -f health=starting -f health=unhealthy --format '{{.Names}}' | tr '\n' ' ')
+
+    if [ -z "$names" ]; then
+        break
+    fi
+
+    if [ "$SECONDS" -ge "$timeout" ]; then
+        printf '\r\033[2K'
+        echo "Timed out after ${timeout}s awaiting: $names" >&2
+        exit 1
+    fi
+
+    printf '\r\033[2KAwaiting %ss %s' "$SECONDS" "$names"
+
     sleep 1
 done
 
