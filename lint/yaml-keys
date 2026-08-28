@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+#
+# Check every YAML path given on stdin, NUL-separated, against what
+# `yq -P 'sort_keys(..)'` would write, and report the ones that differ. Reports
+# and never rewrites: this is the read-only half of a formatting pass, and the
+# writing half is the caller's. Both should take the same path set, or one will
+# rewrite a file the other never checks.
+#
+# Every offender is named rather than only the first, since one formatting run
+# fixes them all either way -- stopping at the first only costs the reader a
+# second run to find the second.
+#
+# Requires yq (mikefarah), whose sort_keys expression the Python jq wrapper of
+# the same name does not implement.
+set -Eeuo pipefail
+shopt -s inherit_errexit failglob
+
+fail=0
+checked=0
+
+while IFS= read -r -d '' f; do
+    checked=$((checked + 1))
+
+    if ! yq -P 'sort_keys(..)' "$f" | diff -q - "$f" > /dev/null; then
+        echo "$f: keys not sorted" >&2
+        fail=1
+    fi
+done
+
+# Reported rather than fatal: an empty set is a project with no YAML as easily
+# as a caller whose own path list came out wrong, and only the caller can tell
+# those apart. Saying how many were checked is what stops nothing-was-checked
+# reading like everything-passed.
+echo "$(basename "$0"): checked $checked file(s)" >&2
+
+if [ "$fail" -ne 0 ]; then
+    echo "YAML key order: rewrite with yq -i -P 'sort_keys(..)'." >&2
+    exit 1
+fi
