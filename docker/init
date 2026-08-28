@@ -5,5 +5,23 @@ shopt -s inherit_errexit failglob
 export DOCKER_BUILDKIT=1
 
 REPO=$(<.dockerrepo)
-TAG=$(git rev-parse --abbrev-ref HEAD | tr '/' '-')
+
+# git rev-parse --abbrev-ref HEAD answers the literal "HEAD" in a detached
+# checkout, which is what a pull request and a tag push both produce -- so the
+# registry collects :HEAD images unless something names the branch first, and
+# every consumer otherwise grows its own `git checkout -B` step ahead of the
+# build. Resolved here instead, from whichever CI names the branch.
+TAG=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$TAG" = HEAD ]; then
+    TAG=${CIRCLE_BRANCH:-${GITHUB_HEAD_REF:-${GITHUB_REF_NAME:-}}}
+fi
+
+# Empty rather than unset is the risk here: a CI that exports its branch
+# variable holding nothing satisfies set -u and leaves the tag empty, which
+# pushes $REPO:.dev rather than failing.
+: "${TAG:?detached HEAD and no CI branch variable set; check out a branch}"
+
+TAG=${TAG//\//-}
+
 export REPO TAG

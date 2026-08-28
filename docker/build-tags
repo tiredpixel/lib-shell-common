@@ -2,27 +2,24 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
-export DOCKER_BUILDKIT=1
+# REPO and TAG rather than a second derivation of each: init resolves a
+# detached HEAD, which the copy here did not, and CircleCI's branch variable
+# moved there with it so every caller gets both.
+source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/init"
 
-if [ -n "${CIRCLE_BRANCH:-}" ]; then
-    branch=$CIRCLE_BRANCH
-else
-    branch=$(git rev-parse --abbrev-ref HEAD)
-fi
 release=$(git describe --abbrev=0)
-repo=$(<.dockerrepo)
 version=$(git describe)
 
-tags=("${branch//\//-}")
+tags=("$TAG")
 
 if [ "$version" == "$release" ]; then
     r=$release
     r_=""
-    
+
     while true; do
         tags+=("$r")
         r=${r%.*}
-        
+
         if [ "$r" == "$r_" ]; then
             break
         else
@@ -36,22 +33,22 @@ caches=()
 
 for tag in "${tags[@]}"; do
     args+=("-t")
-    args+=("$repo:$tag")
+    args+=("$REPO:$tag")
     caches+=("--cache-from")
-    caches+=("$repo:$tag")
+    caches+=("$REPO:$tag")
 done
 
 docker build \
     --build-arg BUILDKIT_INLINE_CACHE=1 \
-    --build-arg GIT_DESCRIBE="$(git describe)" \
+    --build-arg GIT_DESCRIBE="$version" \
     "${caches[@]}" \
     "${args[@]}" .
 
 for tag in "${tags[@]}"; do
-    docker push "$repo:$tag"
+    docker push "$REPO:$tag"
 done
 
 echo
 echo "version: $version"
-echo "repo:    $repo"
+echo "repo:    $REPO"
 echo "tags:    ${tags[*]}"
