@@ -2,10 +2,21 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
-tag=${1}
+tag=${1:?must be set to the tag to create}
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
 
-"$dir/each" git tag -l 2>/dev/null | sort -Vu | grep "^$tag$" && exit 1
+# The sweep's status is checked rather than discarded. It used to be the left
+# operand of an && list, which errexit exempts -- so a sweep that failed, on an
+# uninitialised submodule or a directory that is not a repository, read as "the
+# tag exists nowhere" and the script went on to sign and push it everywhere.
+existing=$("$dir/each" git tag -l 2>/dev/null | sort -Vu)
+
+# -F and -x because a tag is a literal, not a pattern: unanchored, 14.655 also
+# matches 14X655, and a tag carrying a metacharacter matches whatever it means.
+if grep -qFx -- "$tag" <<< "$existing"; then
+    echo "$tag: already exists" >&2
+    exit 1
+fi
 
 "$dir/each" git tag -s "$tag" -m "$tag"
 
