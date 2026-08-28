@@ -2,13 +2,23 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
-dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
-
 git pull --no-recurse-submodules
 
+# One sweep, from here, whose submodules are the projects .projects names --
+# and --recursive reaches theirs in turn. It used to run from inside each
+# project instead, which started the recursion one level too low: it brought
+# each project's own submodules current but never the project, so a stage that
+# reports having pulled everything left every project on whatever commit its
+# working tree happened to sit on.
+#
+# checkout before pull, because a submodule is checked out at a recorded commit
+# and a detached HEAD has nothing to pull into. The branch comes from
+# origin/HEAD rather than a literal, so a project whose default branch is not
+# the usual one still follows its own -- which is also why this cannot be
+# git submodule update --remote, whose --rebase and --merge act on the branch
+# the parent recorded instead.
 # shellcheck disable=SC2016
-"$dir/each-without-project" sh -c '
-    git submodule foreach --recursive '\''
-        branch=$(git symbolic-ref --short refs/remotes/origin/HEAD | cut -d'\''/'\'' -f2)
-        git checkout "$branch"
-        git pull --no-recurse-submodules'\'''
+git submodule foreach --recursive '
+    branch=$(git symbolic-ref --short refs/remotes/origin/HEAD | cut -d/ -f2)
+    git checkout "$branch"
+    git pull --no-recurse-submodules'
