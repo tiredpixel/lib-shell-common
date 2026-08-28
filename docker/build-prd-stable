@@ -4,9 +4,7 @@ shopt -s inherit_errexit failglob
 
 source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/init"
 
-# Resolved here rather than inline, for the reason docker/build-compose states:
-# an argument's command substitution cannot fail the command it is an argument
-# to, so an untagged repo stamped the image with nothing and said only fatal:.
+# Resolved here rather than inline, for the reason docker/build-compose states.
 describe=$(git describe 2>/dev/null || true)
 
 docker build \
