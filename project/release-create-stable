@@ -2,17 +2,19 @@
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
-tag=${1}
+# :? rather than a bare ${1}, as project/tag-create already writes it. An empty
+# argument passes a bare expansion untouched and was caught only by tag-create
+# -- after the sweep had run and the release commit had been made.
+tag=${1:?must be set to the tag to create}
 dir=$(dirname "$(realpath "${BASH_SOURCE[0]}")")
+
+"$dir/release-assert"
 
 "$dir/each" git checkout testing --no-recurse-submodules
 
 "$dir/each" git pull --no-recurse-submodules
 
-if ! git diff --quiet ; then
-    git add -A
-    git commit -m "update"
-fi
+"$dir/release-commit-submodules"
 
 "$dir/tag-create" "$tag"
 

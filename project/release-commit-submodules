@@ -1,0 +1,162 @@
+#!/usr/bin/env bash
+#
+# Commits the submodule pointers a release moved, and nothing else.
+#
+# It replaces `git add -A`, which staged the whole working tree: a release
+# taken beside unrelated work committed that work, and build output the
+# repository did not ignore landed in the release commit. The guard in front of
+# it was `if ! git diff --quiet`, which asks about the index rather than HEAD,
+# so content already staged read as nothing to do -- and which turns git's 128
+# on error into the "there are changes" branch.
+#
+# project/release-assert has already refused a tree carrying anything but
+# submodule pointers, so what is left here is a pointer or a fault.
+#
+# Running it again is safe: a second pass finds nothing bumped and skips the
+# commit, because an empty result is a skip and not a failure.
+set -Eeuo pipefail
+shopt -s inherit_errexit failglob
+
+# lastpipe so the loop below runs in this shell and keeps what it reads, and so
+# pipefail sees git's status. A process substitution hides it entirely:
+# `mapfile -d "" -t x < <(false)` succeeds, leaving an empty array that reads
+# as "nothing to commit" -- and the release would go on to sign and push a tag
+# without the bump. project/tag-create carries a comment about the same shape.
+#
+# lastpipe needs job control off, and a script reached through its shebang
+# always has it off: the setting is not inherited across the exec, so a caller
+# running with job control on cannot pass it in. Only a `set -m` here would
+# take it back, and it would do so silently -- the loop would run in a subshell
+# and the array arrive empty.
+shopt -s lastpipe
+
+# Every path question settled in one place. Pathspecs handed to git commit are
+# resolved against the current directory, git diff-index prints from the root,
+# and diff.relative would drop a submodule outside the current directory from
+# the answer altogether. At the root the three agree.
+cd "$(git rev-parse --show-toplevel)"
+
+bumped=()
+recorded=()
+refused=()
+
+# One plumbing call answers every question: which paths are gitlinks, what
+# changed, and the commit HEAD records. That last is srcsha, so
+# `git rev-parse HEAD:<path>` is not needed -- which matters, because without
+# --verify it prints the unresolvable string on stdout and exits 128.
+#
+# --ignore-submodules=dirty confines this to the recorded commit, the only
+# thing this repository can commit about a submodule. It does not suppress a
+# removal: git tests a missing path before it consults the setting, so the
+# status letter is read rather than assumed.
+git diff-index --raw -z --ignore-submodules=dirty HEAD |
+    while IFS= read -r -d '' meta && IFS= read -r -d '' path; do
+        # :<srcmode> <dstmode> <srcsha> <dstsha> <status>
+        # dstsha is all zeroes when the comparison is against the working tree.
+        read -r srcmode dstmode srcsha _ status <<< "${meta#:}"
+
+        if [ "$srcmode" != 160000 ] && [ "$dstmode" != 160000 ]; then
+            continue
+        fi
+
+        # A pointer move is M with a gitlink either side. A is a submodule
+        # added and not committed; D a directory that is not checked out, which
+        # git commit --only would record as the submodule's removal; T one
+        # replaced by a regular file; U an unmerged path.
+        if [ "$status" != M ] ||
+            [ "$srcmode" != 160000 ] || [ "$dstmode" != 160000 ]; then
+            refused+=( "$status $path" )
+
+            continue
+        fi
+
+        bumped+=( "$path" )
+        recorded+=( "$srcsha" )
+    done
+
+if [ "${#refused[@]}" -gt 0 ]; then
+    echo "$PWD: refusing to commit, these are not pointer moves:" >&2
+    printf '  %s\n' "${refused[@]}" >&2
+    echo "In a release run the sweep has already checked out and pulled every" >&2
+    echo "project by this point; nothing is tagged or pushed either way." >&2
+
+    exit 1
+fi
+
+if [ "${#bumped[@]}" -gt 0 ]; then
+    echo "$PWD: committing submodule pointers:" >&2
+
+    paths=()
+
+    for i in "${!bumped[@]}"; do
+        path=${bumped[i]}
+        was=${recorded[i]}
+
+        # Repository discovery walks up, so `git -C <path> rev-parse HEAD` in a
+        # directory that is not its own repository answers with this
+        # repository's HEAD, and every question below would be about the wrong
+        # pair of commits. -ef is an inode test, so ./ and a symlink compare
+        # equal.
+        top=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null) || top=
+
+        if [[ ! $top -ef $path ]]; then
+            echo "$PWD: $path: not a repository of its own, resolving to ${top:-nothing}" >&2
+            echo "Nothing is tagged or pushed." >&2
+
+            exit 1
+        fi
+
+        now=$(git -C "$path" rev-parse HEAD)
+
+        # --is-ancestor answers 1 for "no" and any other non-zero for an error,
+        # so the status is read rather than tested: `if ! git merge-base ...`
+        # would report a direction nobody established. Asked both ways, because
+        # one alone cannot separate a rewind from a divergence -- and a
+        # divergence, which drops commits this repository already recorded, is
+        # the worse of the two. Reported and not refused: what a release
+        # carries is what is in the tree, and a submodule is not forced up to
+        # date because it may not have been reviewed yet.
+        forwards=0
+        git -C "$path" merge-base --is-ancestor "$was" "$now" || forwards=$?
+
+        backwards=0
+        git -C "$path" merge-base --is-ancestor "$now" "$was" || backwards=$?
+
+        case "$forwards$backwards" in
+            01) direction=forwards ;;
+            10) direction="moves back" ;;
+            11) direction=diverged ;;
+            *)  direction="direction unknown" ;;
+        esac
+
+        printf '  %s  %s -> %s  (%s)\n' \
+            "$path" "${was:0:9}" "${now:0:9}" "$direction" >&2
+
+        # :(literal) as pathspec magic rather than the global
+        # --literal-pathspecs, which exports GIT_LITERAL_PATHSPECS=1 into every
+        # hook. A submodule path may carry a glob metacharacter, or begin with
+        # a colon -- the distinction project/tag-create draws for a tag.
+        paths+=( ":(literal)$path" )
+    done
+
+    # --only takes the working tree contents of exactly these paths and
+    # disregards what is staged for any other, so an index the caller had
+    # already arranged is neither committed nor disturbed. For these paths it
+    # does replace what was staged, which project/release-assert has already
+    # refused most of the ways to arrive at.
+    git commit --only -q -m update -- "${paths[@]}"
+fi
+
+# Whatever the tree still holds is outside this release. Called from a release
+# script it can only be a submodule carrying its own uncommitted work, which no
+# commit here can record, because project/release-assert refused everything
+# else before the sweep began. The heading does not say that, though: this
+# script does not check it, and run on its own the claim would be false.
+# To stderr, as project/each's echo_line comment insists -- project/tag-create
+# captures a sweep's stdout.
+remaining=$(git status --short --untracked-files=normal)
+
+if [ -n "$remaining" ]; then
+    echo "$PWD: left uncommitted, so this release does not carry it:" >&2
+    printf '%s\n' "$remaining" >&2
+fi
