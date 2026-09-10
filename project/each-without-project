@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
+#
+# Runs one command in each project this project sweeps, and not in this one --
+# project/each adds that.
+#
+# The sweep is .projects, one path per line, and every entry is a submodule of
+# this repository. They are the submodules that belong to this project: they
+# share its version number and are tagged with it. A submodule that is
+# third-party, or versioned on its own, is deliberately absent, which is why
+# the list is curated rather than derived from .gitmodules -- and why
+# project/release-assert reports the submodules it omits instead of refusing
+# them.
 set -Eeuo pipefail
 shopt -s inherit_errexit failglob
 
@@ -34,6 +45,24 @@ function echo_line() {
 if [ -f "$f_projects" ] ; then
     while IFS= read -r project <&3 || [ -n "$project" ]; do
         [ -z "$project" ] && continue
+
+        # An entry that is not a submodule does not fail on its own: git
+        # discovers this repository from inside any plain directory, so
+        # `git tag -l` there answers about this one and the sweep reports
+        # having visited a project it never entered. Assigned rather than
+        # piped, so the status errexit sees is git's own and not a filter's.
+        # :(literal) because a path is a literal, not a pattern.
+        entry=$(git ls-files --stage -- ":(literal)$project")
+
+        case $entry in
+            '160000 '*) ;;
+            *)
+                echo "$project: not a submodule of $PWD, so it cannot be swept" >&2
+
+                exit 1
+                ;;
+        esac
+
         pushd "$project" >/dev/null
 
         echo_line
